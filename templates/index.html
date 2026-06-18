@@ -1,53 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Career Guidance Chatbot</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<div class="chat-container">
-    <h1>AI Career Guidance Chatbot</h1>
-    <p class="subtitle">Ask about AI, ML, skills, projects, internships, and interviews</p>
+<div class="app">
 
-    <div id="chat-box">
-        <div class="bot-message">
-            Hello! I am your AI Career Guidance Chatbot. Ask me anything about AI careers.
+    <aside class="sidebar">
+        <h2>AI Career Bot</h2>
+        <button class="new-chat-btn" onclick="clearChat()">+ New Chat</button>
+
+        <div class="suggestions">
+            <p>Try asking:</p>
+            <button onclick="askSuggestion('How can I become an AI Engineer?')">Become AI Engineer</button>
+            <button onclick="askSuggestion('What skills are required for AI?')">AI Skills</button>
+            <button onclick="askSuggestion('How can I get an AI internship?')">AI Internship</button>
+            <button onclick="askSuggestion('How do I prepare for AI interviews?')">AI Interview</button>
         </div>
-    </div>
+    </aside>
 
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="Type your question here...">
-        <button onclick="sendMessage()">Send</button>
-    </div>
+    <section class="chat-section">
+        <header class="chat-header">
+            <div class="bot-icon">AI</div>
+            <div>
+                <h1>AI Career Guidance Chatbot</h1>
+                <p>Ask about AI careers, skills, projects, internships, and interviews</p>
+            </div>
+        </header>
+
+        <main id="chat-box">
+            <div class="welcome-screen">
+                <div class="big-icon">AI</div>
+                <h2>How can I help you today?</h2>
+                <p>Ask me anything about AI career guidance.</p>
+            </div>
+        </main>
+
+        <footer class="input-area">
+            <input type="text" id="user-input" placeholder="Message AI Career Bot...">
+            <button onclick="sendMessage()">Send</button>
+        </footer>
+    </section>
+
 </div>
 
 <script>
 function addMessage(message, sender) {
     const chatBox = document.getElementById("chat-box");
 
+    const welcome = document.querySelector(".welcome-screen");
+    if (welcome) {
+        welcome.remove();
+    }
+
     const wrapper = document.createElement("div");
     wrapper.className = "message-wrapper";
+
+    const avatar = document.createElement("div");
+    avatar.className = sender === "user-message" ? "avatar user-avatar" : "avatar bot-avatar";
+    avatar.innerText = sender === "user-message" ? "You" : "AI";
+
+    const contentBox = document.createElement("div");
+    contentBox.className = "content-box";
 
     const msg = document.createElement("div");
     msg.className = sender;
     msg.innerText = message;
 
-    wrapper.appendChild(msg);
+    const actions = document.createElement("div");
+    actions.className = "message-actions";
+
+    const copyBtn = document.createElement("button");
+    copyBtn.innerText = "Copy";
+    copyBtn.className = "action-btn";
+    copyBtn.onclick = function() {
+        navigator.clipboard.writeText(message);
+        copyBtn.innerText = "Copied!";
+        setTimeout(() => copyBtn.innerText = "Copy", 1000);
+    };
+
+    actions.appendChild(copyBtn);
 
     if (sender === "user-message") {
-        const actions = document.createElement("div");
-        actions.className = "message-actions";
-
-        const copyBtn = document.createElement("button");
-        copyBtn.innerText = "Copy";
-        copyBtn.className = "action-btn";
-        copyBtn.onclick = function() {
-            navigator.clipboard.writeText(message);
-            copyBtn.innerText = "Copied!";
-            setTimeout(() => copyBtn.innerText = "Copy", 1000);
-        };
-
         const editBtn = document.createElement("button");
         editBtn.innerText = "Edit";
         editBtn.className = "action-btn";
@@ -55,11 +93,14 @@ function addMessage(message, sender) {
             document.getElementById("user-input").value = message;
             document.getElementById("user-input").focus();
         };
-
-        actions.appendChild(copyBtn);
         actions.appendChild(editBtn);
-        wrapper.appendChild(actions);
     }
+
+    contentBox.appendChild(msg);
+    contentBox.appendChild(actions);
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(contentBox);
 
     chatBox.appendChild(wrapper);
     chatBox.scrollTop = chatBox.scrollHeight;
@@ -85,6 +126,21 @@ function sendMessage() {
     .then(data => {
         addMessage(data.response, "bot-message");
     });
+}
+
+function askSuggestion(question) {
+    document.getElementById("user-input").value = question;
+    sendMessage();
+}
+
+function clearChat() {
+    document.getElementById("chat-box").innerHTML = `
+        <div class="welcome-screen">
+            <div class="big-icon">AI</div>
+            <h2>How can I help you today?</h2>
+            <p>Ask me anything about AI career guidance.</p>
+        </div>
+    `;
 }
 
 document.getElementById("user-input").addEventListener("keypress", function(event) {
